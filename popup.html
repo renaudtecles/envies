@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Envies</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <h1>Envies</h1>
+      <p class="summary" id="summary">&nbsp;</p>
+    </div>
+    <div class="total">
+      <span class="total-label" id="totalLabel">Total</span>
+      <button type="button" class="total-value" id="totalValue">0 CHF</button>
+      <span class="total-sub" id="totalSub"></span>
+    </div>
+  </header>
+
+  <section class="add">
+    <form id="addForm" class="add-field" autocomplete="off">
+      <svg class="add-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M8.5 11.5a3.5 3.5 0 0 0 5 0l2.5-2.5a3.5 3.5 0 0 0-5-5l-1 1M11.5 8.5a3.5 3.5 0 0 0-5 0L4 11a3.5 3.5 0 0 0 5 5l1-1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <input id="urlInput" type="text" placeholder="Coller un lien produit…" spellcheck="false">
+      <button type="submit" class="btn-round" aria-label="Ajouter le lien">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </form>
+    <button id="addCurrent" class="add-current" type="button" hidden>
+      <img id="currentFav" alt="">
+      <span class="add-current-text">
+        <strong id="currentLabel">Ajouter la page actuelle</strong>
+        <span id="currentHost"></span>
+      </span>
+      <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 4l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </section>
+
+  <nav class="chips" id="chips" aria-label="Catégories"></nav>
+
+  <div class="toolbar">
+    <span id="countLabel"></span>
+    <button type="button" class="sort" id="sortBtn"></button>
+  </div>
+
+  <main class="list" id="list"></main>
+
+  <!-- Fiche article : ajout / modification -->
+  <div class="sheet-wrap" id="sheet" hidden>
+    <div class="backdrop" data-close></div>
+    <form class="sheet" id="draftForm" autocomplete="off">
+      <div class="sheet-head">
+        <span class="eyebrow" id="sheetEyebrow">Nouvel article</span>
+        <button type="button" class="icon-btn" data-close aria-label="Fermer">
+          <svg viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="draft-product">
+        <div class="thumb lg" id="draftThumb"></div>
+        <div class="draft-text">
+          <textarea id="draftTitle" rows="3" placeholder="Nom de l'article"></textarea>
+          <a class="draft-site" id="draftSite" href="#"></a>
+        </div>
+      </div>
+      <div class="field">
+        <span class="label">Prix</span>
+        <div class="price-input">
+          <input id="draftPrice" inputmode="decimal" placeholder="0,00">
+          <select id="draftCurrency" aria-label="Devise">
+            <option>EUR</option><option>CHF</option><option>USD</option><option>GBP</option>
+          </select>
+          <button type="button" class="icon-btn refresh" id="draftRefresh" title="Relire le prix sur le site" aria-label="Relire le prix">
+            <svg viewBox="0 0 20 20"><path d="M15.5 8A6 6 0 0 0 4.6 6.5M4.5 12a6 6 0 0 0 10.9 1.5M15.5 3.5V8H11M4.5 16.5V12H9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+        <p class="conv" id="draftConv"></p>
+        <p class="hint" id="draftHint"></p>
+      </div>
+      <div class="field">
+        <span class="label">Catégorie</span>
+        <div class="seg" id="draftCats"></div>
+      </div>
+      <label class="field">
+        <span class="label">Note</span>
+        <input id="draftNote" placeholder="Taille, couleur, alternative…">
+      </label>
+      <div class="sheet-actions">
+        <button type="button" class="btn ghost" data-close>Annuler</button>
+        <button type="submit" class="btn primary" id="draftSubmit">Ajouter à la liste</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="menu" id="menu" role="menu" hidden></div>
+  <div class="toast" id="toast" role="status"></div>
+
+  <script src="shared.js"></script>
+  <script src="extract.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
