@@ -173,3 +173,77 @@ function toCHF(amount, currency, rates) {
   const r = rates && rates[currency];
   return r ? amount / r : null;
 }
+
+/* Relier à Repère (facultatif) --------------------------------------------- */
+
+const LINK_KEY = 'envies-repere';   // { address, token, sentAt, error } : rangé à part, jamais dans la liste
+
+async function loadLink() {
+  const r = await chrome.storage.local.get(LINK_KEY);
+  return r[LINK_KEY] || null;
+}
+
+/** Adresse acceptée : https, ou l'ordinateur lui-même pour les essais. Renvoie l'adresse propre, ou null. */
+function linkAddress(value) {
+  try {
+    const u = new URL(String(value || '').trim());
+    const local = u.hostname === 'localhost' || u.hostname === '127.0.0.1';
+    if (u.protocol !== 'https:' && !(local && u.protocol === 'http:')) return null;
+    if (u.username || u.password || u.search) return null;
+    if (u.pathname === '/' || u.pathname === '') u.pathname = '/api/envies';
+    u.hash = '';
+    return u.href;
+  } catch (e) {
+    return null;
+  }
+}
+
+/** Ce qui part : la fiche de chaque article, sans l'historique des prix ni les réglages. */
+function linkPayload(s) {
+  const names = new Map(s.categories.map((c) => [c.id, c.name]));
+  return {
+    items: s.items.filter((i) => !i.pending).slice(0, 500).map((i) => ({
+      id: i.id,
+      url: i.url,
+      title: String(i.title || hostOf(i.url)).slice(0, 400),
+      price: i.price || null,
+      currency: i.currency || null,
+      image: /^https:/.test(i.image || '') ? i.image.slice(0, 2000) : null,
+      site: (i.site || '').slice(0, 120) || null,
+      category: (names.get(i.categoryId) || '').slice(0, 80) || null,
+      note: (i.note || '').slice(0, 1000) || null,
+      bought: !!i.bought,
+    })),
+  };
+}
+
+/** Envoie la liste. Renvoie { ok, added, updated } ou { ok: false, error } et retient le résultat. */
+async function sendToRepere() {
+  const link = await loadLink();
+  if (!link || !link.address || !link.token) return { ok: false, error: 'Pas encore relié' };
+  let result;
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 20000);
+    const res = await fetch(link.address, {
+      method: 'POST',
+      credentials: 'omit',
+      redirect: 'error',
+      signal: ctrl.signal,
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${link.token}` },
+      body: JSON.stringify(linkPayload(await loadState())),
+    });
+    clearTimeout(timer);
+    const body = await res.json().catch(() => ({}));
+    if (res.ok) result = { ok: true, added: body.added || 0, updated: body.updated || 0 };
+    else result = { ok: false, error: res.status === 401 ? 'Jeton refusé' : body.error || `Erreur ${res.status}` };
+  } catch (e) {
+    result = { ok: false, error: 'Adresse injoignable' };
+  }
+  // Si on a délié pendant l'envoi, on ne recrée pas le lien
+  const now = await loadLink();
+  if (now && now.token === link.token && now.address === link.address) {
+    await chrome.storage.local.set({ [LINK_KEY]: { ...now, sentAt: result.ok ? Date.now() : now.sentAt || null, error: result.ok ? null : result.error } });
+  }
+  return result;
+}

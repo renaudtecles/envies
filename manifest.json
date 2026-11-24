@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Envies — liste d'achats",
   "short_name": "Envies",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Garde tes futurs achats au même endroit : lien, prix relevé automatiquement, catégorie.",
   "action": {
     "default_title": "Envies",

@@ -34,7 +34,7 @@ Pour l'ouvrir au clavier : <kbd>⌥</kbd> <kbd>⇧</kbd> <kbd>E</kbd> sur Mac, <
 Ça devrait marcher pareil dans Edge, Brave ou Arc, depuis leur page d'extensions (pas testé).
 
 > **Chrome prévient qu'Envies peut « lire et modifier vos données sur tous les sites ».**
-> C'est ce qui lui permet d'ouvrir la page d'un produit pour y lire le prix. Elle ne le fait que pour les liens que tu ajoutes, et elle n'envoie ta liste nulle part.
+> C'est ce qui lui permet d'ouvrir la page d'un produit pour y lire le prix. Elle ne le fait que pour les liens que tu ajoutes, et elle n'envoie ta liste nulle part, sauf si tu la relies toi-même à Repère.
 
 ## L'utiliser
 
@@ -56,7 +56,8 @@ Quand Envies lit plusieurs liens d'un coup, des onglets s'ouvrent et se refermen
 
 - **Prix introuvable ?** Certains sites bloquent la lecture automatique. La fiche te le dit : tape le prix, il est gardé.
 - **Lien mort ?** Si la page n'existe plus (erreur 404, renvoi vers l'accueil du site), Envies le note sur l'article.
-- **Ta liste reste chez toi** : elle est enregistrée dans ton Chrome, pas en ligne. Envies ne contacte que les pages produits que tu ajoutes et, deux fois par jour au plus, [frankfurter.dev](https://frankfurter.dev) pour le taux de change.
+- **Ta liste reste chez toi** : elle est enregistrée dans ton Chrome, pas en ligne. Sans lien avec Repère, Envies ne contacte que les pages produits que tu ajoutes et, deux fois par jour au plus, [frankfurter.dev](https://frankfurter.dev) pour le taux de change.
+- **Relier à Repère (facultatif)** : en bas du panneau, **Relier à Repère**. Tu colles l'adresse et le jeton de ta propre installation ; chaque changement de la liste y est alors envoyé (lien, nom, prix, photo, catégorie, note, acheté ou non). **Délier** arrête tout.
 - **Pas de synchronisation** entre ordinateurs pour l'instant, et supprimer l'extension efface la liste.
 
 ## Mettre à jour

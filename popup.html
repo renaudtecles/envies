@@ -48,6 +48,38 @@
 
   <main class="list" id="list"></main>
 
+  <button type="button" class="link-foot" id="linkBtn">
+    <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8.5 11.5a3.5 3.5 0 0 0 5 0l2.5-2.5a3.5 3.5 0 0 0-5-5l-1 1M11.5 8.5a3.5 3.5 0 0 0-5 0L4 11a3.5 3.5 0 0 0 5 5l1-1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    <span id="linkLabel">Relier à Repère</span>
+  </button>
+
+  <!-- Lien avec Repère -->
+  <div class="sheet-wrap" id="linkSheet" hidden>
+    <div class="backdrop" data-close></div>
+    <form class="sheet" id="linkForm" autocomplete="off">
+      <div class="sheet-head">
+        <span class="eyebrow">Relier à Repère</span>
+        <button type="button" class="icon-btn" data-close aria-label="Fermer">
+          <svg viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <p class="hint">Dans Repère : Réglages, Téléphone et accès, carte « Extension Envies ». Copie l'adresse, puis le jeton.</p>
+      <label class="field">
+        <span class="label">Adresse</span>
+        <input id="linkAddress" inputmode="url" spellcheck="false" placeholder="https://…/api/envies">
+      </label>
+      <label class="field">
+        <span class="label">Jeton</span>
+        <input id="linkToken" type="password" autocomplete="off" spellcheck="false" placeholder="Colle le jeton ici">
+      </label>
+      <p class="hint" id="linkHint"></p>
+      <div class="sheet-actions">
+        <button type="button" class="btn ghost" id="linkOff" hidden>Délier</button>
+        <button type="submit" class="btn primary" id="linkSubmit">Relier</button>
+      </div>
+    </form>
+  </div>
+
   <!-- Fiche article : ajout / modification -->
   <div class="sheet-wrap" id="sheet" hidden>
     <div class="backdrop" data-close></div>

@@ -198,11 +198,28 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     importEntries(msg.urls || [], { categoryId: msg.categoryId }).then(sendResponse, () => sendResponse(null));
     return true;
   }
+  if (msg.type === 'send-repere') {
+    sendToRepere().then(sendResponse, () => sendResponse({ ok: false, error: 'Envoi impossible' }));
+    return true;
+  }
   if (msg.type === 'read-pending') {
     readAllPending();
     sendResponse(true);
   }
   return false;
+});
+
+/* Envoi vers Repère, quand il est relié ------------------------------------ */
+
+let sendTimer = null;
+chrome.storage.onChanged.addListener((changes, area) => {
+  const change = area === 'local' && changes[STORE_KEY];
+  if (!change) return;
+  // Un filtre ou un tri change aussi l'état : on n'envoie que si la liste elle-même a bougé
+  const part = (v) => JSON.stringify(linkPayload(normalizeState(v)));
+  if (part(change.oldValue) === part(change.newValue)) return;
+  clearTimeout(sendTimer);
+  sendTimer = setTimeout(() => { sendToRepere().catch(() => {}); }, 2500);
 });
 
 /* Menu clic droit ---------------------------------------------------------- */
@@ -259,3 +276,6 @@ chrome.contextMenus.onClicked.addListener((info, tab) => { addFromContextMenu(in
 
 // À chaque réveil du service worker : import en attente, lectures interrompues.
 runBundledImport().then(readAllPending);
+
+// Au démarrage de Chrome, la liste est renvoyée une fois : rien n'est perdu si l'ordinateur était hors ligne.
+chrome.runtime.onStartup.addListener(() => { sendToRepere().catch(() => {}); });

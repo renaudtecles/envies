@@ -858,6 +858,77 @@ function asUrl(text) {
 
 /* Toast -------------------------------------------------------------------- */
 
+/* Lien avec Repère --------------------------------------------------------- */
+
+let link = null;
+
+function sentAgo(ts) {
+  const min = Math.floor((Date.now() - ts) / 60000);
+  if (min < 1) return "à l'instant";
+  if (min < 60) return `il y a ${min} min`;
+  if (min < 1440) return `il y a ${Math.floor(min / 60)} h`;
+  return ago(ts);
+}
+
+function renderLink() {
+  const btn = $('#linkBtn');
+  btn.classList.toggle('on', !!link && !link.error);
+  btn.classList.toggle('warn', !!link && !!link.error);
+  $('#linkLabel').textContent = !link ? 'Relier à Repère'
+    : link.error ? `Repère : ${link.error.toLowerCase()}`
+      : link.sentAt ? `Repère à jour ${sentAgo(link.sentAt)}` : 'Relié à Repère';
+}
+
+function openLink() {
+  closeMenu();
+  $('#linkAddress').value = link ? link.address : '';
+  $('#linkToken').value = '';
+  $('#linkToken').placeholder = link ? 'Jeton enregistré' : 'Colle le jeton ici';
+  $('#linkOff').hidden = !link;
+  $('#linkSubmit').textContent = link ? 'Envoyer maintenant' : 'Relier';
+  linkHint(link && link.error ? link.error : '', true);
+  $('#linkSheet').hidden = false;
+}
+
+function closeLink() { $('#linkSheet').hidden = true; }
+
+function linkHint(text, warn) {
+  const el = $('#linkHint');
+  el.textContent = text;
+  el.className = warn && text ? 'hint warn' : 'hint';
+}
+
+async function submitLink(e) {
+  e.preventDefault();
+  const address = linkAddress($('#linkAddress').value);
+  const token = $('#linkToken').value.trim() || (link && link.token) || '';
+  if (!address) { linkHint('Colle l’adresse complète, qui commence par https://', true); return; }
+  if (token.length < 16) { linkHint('Colle le jeton copié dans Repère.', true); return; }
+  const submit = $('#linkSubmit');
+  submit.disabled = true;
+  linkHint('Envoi de la liste…');
+  await chrome.storage.local.set({ [LINK_KEY]: { address, token, sentAt: null, error: null } });
+  let r = null;
+  try { r = await chrome.runtime.sendMessage({ type: 'send-repere' }); } catch (err) { /* service worker endormi */ }
+  submit.disabled = false;
+  link = await loadLink();
+  renderLink();
+  if (r && r.ok) {
+    closeLink();
+    toast(`Repère à jour : ${plural(r.added, 'ajout')}, ${r.updated} déjà là`);
+  } else {
+    linkHint((r && r.error) || 'Envoi impossible', true);
+  }
+}
+
+async function unlink() {
+  await chrome.storage.local.remove(LINK_KEY);
+  link = null;
+  renderLink();
+  closeLink();
+  toast('Repère délié');
+}
+
 let toastTimer = null;
 function toast(message, actionLabel, action) {
   const t = $('#toast');
@@ -927,6 +998,11 @@ function bind() {
     renderList();
   });
 
+  $('#linkBtn').addEventListener('click', openLink);
+  $('#linkForm').addEventListener('submit', submitLink);
+  $('#linkOff').addEventListener('click', unlink);
+  $('#linkSheet').addEventListener('click', (e) => { if (e.target.closest('[data-close]')) closeLink(); });
+
   $('#draftForm').addEventListener('submit', submitDraft);
   $('#sheet').addEventListener('click', (e) => { if (e.target.closest('[data-close]')) closeSheet(); });
   $('#draftSite').addEventListener('click', (e) => { e.preventDefault(); if (draft) openUrl(draft.item.url, e); });
@@ -951,10 +1027,12 @@ function bind() {
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
     if (!$('#menu').hidden) { closeMenu(); e.preventDefault(); return; }
+    if (!$('#linkSheet').hidden) { closeLink(); e.preventDefault(); return; }
     if (draft) { closeSheet(); e.preventDefault(); }
   });
 
   chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === 'local' && changes[LINK_KEY]) { link = changes[LINK_KEY].newValue || null; renderLink(); }
     if (area !== 'local' || !changes[STORE_KEY]) return;
     const next = changes[STORE_KEY].newValue;
     if (JSON.stringify(next) === lastWritten) return;
@@ -982,6 +1060,7 @@ async function init() {
   if (filter !== 'all' && filter !== 'none' && !catById(filter)) filter = 'all';
   sortMode = SORTS[state.prefs.sort] ? state.prefs.sort : 'recent';
   render();
+  loadLink().then((l) => { link = l; renderLink(); });
   setupCurrentTab();
   refreshRatesIfStale(savedRates);
   // Articles « en lecture » : le service worker reprend ceux qui ont été interrompus.
