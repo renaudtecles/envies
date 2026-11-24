@@ -80,7 +80,7 @@ function fmt(amount, currency) {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency', currency: currency || 'EUR',
       minimumFractionDigits: whole ? 0 : 2, maximumFractionDigits: whole ? 0 : 2,
-    }).format(amount);
+    }).format(amount).replace(/ /g, ' ');   // espace fine → espace insécable : visible en Fraunces
   } catch (e) {
     return `${amount.toFixed(2).replace('.', ',')} ${currency || ''}`.trim();
   }
